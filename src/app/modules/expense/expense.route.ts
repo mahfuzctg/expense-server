@@ -40,7 +40,7 @@ router.get(
 );
 
 // Update an expense by ID
-router.put(
+router.patch(
   '/:id',
   validateRequest(updateExpenseSchema),
   expenseController.updateExpense

@@ -22,6 +22,25 @@ export class UserController {
       data: user,
     });
   });
+
+  /**
+   * Get a specific user by ID
+   */
+  getUserById = catchAsync(async (req: AuthRequest, res: Response) => {
+    const { id } = req.params;
+
+    const user = await userService.findUserById(id);
+
+    if (!user) {
+      throw new ApiError(404, 'User not found');
+    }
+
+    sendResponse(res, 200, {
+      success: true,
+      message: 'User retrieved successfully',
+      data: user,
+    });
+  });
 }
 
 export const userController = new UserController();

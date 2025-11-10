@@ -104,7 +104,7 @@ expense-insight-backend/
    JWT_COOKIE_EXPIRES_IN=7
 
    # Optional: Frontend URL for CORS
-   # FRONTEND_URL=http://localhost:3001
+   # FRONTEND_URL=http://localhost:5000
    ```
 
 4. **Start MongoDB**
@@ -115,7 +115,7 @@ expense-insight-backend/
    npm run dev
    ```
 
-   The server will start on `http://localhost:3000`
+   The server will start on `http://localhost:5000`
 
 ## 📚 API Endpoints
 

@@ -12,20 +12,37 @@ interface Config {
   jwtCookieExpiresIn: number;
 }
 
+const DEFAULT_MONGO_URI = 'mongodb://127.0.0.1:27017/expense_insight';
+
 // Helper function to fetch environment variables with fallback and validation
 const getEnvVar = (key: string, fallback?: string, required = false): string => {
-  const value = process.env[key] || fallback;
-  if (required && (typeof value === 'undefined' || value === '')) {
+  const rawValue = process.env[key];
+
+  if (rawValue && rawValue.trim() !== '') {
+    return rawValue.trim();
+  }
+
+  if (required) {
     throw new Error(`Missing required environment variable: ${key}`);
   }
-  return value || '';
+
+  if (typeof fallback !== 'undefined') {
+    if (!rawValue) {
+      console.warn(
+        `Environment variable ${key} not set. Falling back to default value.`
+      );
+    }
+    return fallback;
+  }
+
+  return '';
 };
 
 export const config: Config = {
-  port: Number(getEnvVar('PORT', '3000')),
+  port: Number(getEnvVar('PORT', '5000')),
   nodeEnv: getEnvVar('NODE_ENV', 'development'),
-  mongoUri: getEnvVar('MONGO_URI', '*', true),
-  jwtSecret: getEnvVar('JWT_SECRET', 'jhdhdjeuiuerujdfjdjjjdjueueudjdj', true),
+  mongoUri: getEnvVar('MONGO_URI', DEFAULT_MONGO_URI),
+  jwtSecret: getEnvVar('JWT_SECRET', undefined, true),
   jwtExpiresIn: getEnvVar('JWT_EXPIRES_IN', '7d'),
   jwtCookieExpiresIn: Number(getEnvVar('JWT_COOKIE_EXPIRES_IN', '7')),
 };
@@ -36,17 +53,17 @@ export const connectDB = async (): Promise<void> => {
     console.log('✅ MongoDB connected successfully');
   } catch (error) {
     console.error('❌ MongoDB connection error:', error);
-    process.exit(1);
+    throw error;
   }
 };
 
 // Unified MongoDB event handler
 const mongoEventLogger = (event: string, error?: unknown) => {
   const messages: Record<string, string> = {
+    connected: '✅ MongoDB connection established',
     disconnected: '⚠️ MongoDB disconnected',
     error: `❌ MongoDB error: ${error}`,
   };
-  // Fallback to console.error if event is error with error obj, console.log otherwise
   if (event === 'error') {
     console.error(messages[event]);
   } else {
@@ -54,6 +71,7 @@ const mongoEventLogger = (event: string, error?: unknown) => {
   }
 };
 
+mongoose.connection.on('connected', () => mongoEventLogger('connected'));
 mongoose.connection.on('disconnected', () => mongoEventLogger('disconnected'));
 mongoose.connection.on('error', (error) => mongoEventLogger('error', error));
 
