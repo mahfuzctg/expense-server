@@ -1,14 +1,16 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { IBudget } from './budget.interface';
 
-export interface IBudgetDocument extends IBudget, Document {}
+export interface IBudgetDocument extends Omit<IBudget, '_id' | 'id'>, mongoose.Document {
+  _id: mongoose.Types.ObjectId;
+}
 
 const budgetSchema = new Schema<IBudgetDocument>(
   {
     amount: {
       type: Number,
       required: [true, 'Budget amount is required'],
-      min: [0, 'Budget amount cannot be negative'],
+      min: [0, 'Budget amount must be positive'],
     },
     month: {
       type: Number,
@@ -19,20 +21,21 @@ const budgetSchema = new Schema<IBudgetDocument>(
     year: {
       type: Number,
       required: [true, 'Year is required'],
-      min: [2000, 'Year must be reasonable'],
-      max: [2100, 'Year must be reasonable'],
+      min: [2000, 'Year must be between 2000 and 2100'],
+      max: [2100, 'Year must be between 2000 and 2100'],
     },
     createdBy: {
-      type: Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId as any,
       ref: 'User',
-      required: true,
+      required: [true, 'User ID is required'],
+      index: true,
     },
   },
   {
     timestamps: true,
     toJSON: {
-      transform: (_doc, ret) => {
-        ret.id = ret._id;
+      transform: (_doc, ret: any) => {
+        ret.id = ret._id?.toString();
         delete ret._id;
         delete ret.__v;
         return ret;
@@ -41,7 +44,7 @@ const budgetSchema = new Schema<IBudgetDocument>(
   }
 );
 
-budgetSchema.index({ createdBy: 1, month: 1, year: 1 }, { unique: true });
+budgetSchema.index({ createdBy: 1, year: 1, month: 1 }, { unique: true });
 
 export const Budget = mongoose.model<IBudgetDocument>('Budget', budgetSchema);
 

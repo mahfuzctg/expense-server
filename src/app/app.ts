@@ -16,6 +16,7 @@ app.use(helmet());
 
 // CORS configuration
 const allowedOrigins = [
+  'https://client-livid-pi.vercel.app',
   'http://localhost:3000',
   'http://localhost:5000',
   process.env.FRONTEND_URL || '',
@@ -55,7 +56,7 @@ app.get('/', (_req, res) => {
       health: '/api/health',
       auth: '/api/auth',
       expenses: '/api/expenses',
-      budgets: '/api/budgets',
+      budget: '/api/budget',
     },
     timestamp: new Date().toISOString(),
   });
@@ -71,7 +72,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/expense', expenseRoutes);
-app.use('/api/budgets', budgetRoutes);
+app.use('/api/budget', budgetRoutes);
 
 // 404 handler
 app.use(notFound);

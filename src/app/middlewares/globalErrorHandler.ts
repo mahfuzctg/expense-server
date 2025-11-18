@@ -4,9 +4,9 @@ import { ApiError } from '../utils/ApiError';
 
 export const globalErrorHandler = (
   err: Error | ApiError | ZodError,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   // Zod validation errors
   if (err instanceof ZodError) {
@@ -47,11 +47,12 @@ export const globalErrorHandler = (
 
   // Default server error
   console.error('Error:', err);
-  res.status(500).json({
+  return res.status(500).json({
     success: false,
-    message: process.env.NODE_ENV === 'production' 
-      ? 'Internal server error' 
-      : err.message,
+    message:
+      process.env.NODE_ENV === 'production'
+        ? 'Internal server error'
+        : err.message,
     ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
   });
 };

@@ -1,8 +1,10 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { ExpenseCategory } from './expense.constant';
 import { IExpense } from './expense.interface';
 
-export interface IExpenseDocument extends IExpense, Document {}
+export interface IExpenseDocument extends Omit<IExpense, '_id'>, mongoose.Document {
+  _id: mongoose.Types.ObjectId;
+}
 
 const expenseSchema = new Schema<IExpenseDocument>(
   {
@@ -30,25 +32,25 @@ const expenseSchema = new Schema<IExpenseDocument>(
       required: [true, 'Date is required'],
     },
     createdBy: {
-      type: Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId as any,
       ref: 'User',
       required: [true, 'User ID is required'],
     },
   },
-  {
+{
     timestamps: true,
     toJSON: {
-      transform: (doc, ret) => {
-        ret.id = ret._id;
-        delete ret._id;
-        delete ret.__v;
-        return ret;
+      transform: (_, ret) => {
+        const r: any = ret; 
+        r.id = r._id.toString();
+        delete r._id;
+        delete r.__v;
+        return r;
       },
     },
   }
 );
 
-// Index for better query performance
 expenseSchema.index({ date: -1 });
 expenseSchema.index({ category: 1 });
 expenseSchema.index({ createdBy: 1 });
@@ -57,4 +59,3 @@ expenseSchema.index({ createdBy: 1, category: 1 });
 expenseSchema.index({ createdBy: 1, date: -1, category: 1 });
 
 export const Expense = mongoose.model<IExpenseDocument>('Expense', expenseSchema);
-

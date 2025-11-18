@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import { config } from '../../config';
 import { userService } from '../user/user.service';
 import { IAuthResponse, IJwtPayload } from './auth.interface';
@@ -11,9 +11,12 @@ export class AuthService {
    * Generate JWT token
    */
   generateToken(payload: IJwtPayload): string {
-    return jwt.sign(payload, config.jwtSecret, {
-      expiresIn: config.jwtExpiresIn,
-    });
+    const secret = config.jwtSecret as Secret;
+    const options: SignOptions = {
+      expiresIn: config.jwtExpiresIn as unknown as SignOptions['expiresIn'],
+    };
+
+    return jwt.sign(payload, secret, options);
   }
 
   /**

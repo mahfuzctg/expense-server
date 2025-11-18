@@ -1,14 +1,14 @@
 import { Router } from 'express';
 import { protect } from '../../middlewares/auth.middleware';
 import { validateRequest } from '../../middlewares/validateRequest';
+import { getBudgetQuerySchema, upsertBudgetSchema } from './budget.validation';
 import { budgetController } from './budget.controller';
-import { getBudgetSummarySchema, upsertBudgetSchema } from './budget.validation';
 
 const router = Router();
 
 router.use(protect);
 
-router.get('/', validateRequest(getBudgetSummarySchema), budgetController.getMonthlySummary);
+router.get('/', validateRequest(getBudgetQuerySchema), budgetController.getBudgetSummary);
 router.put('/', validateRequest(upsertBudgetSchema), budgetController.upsertBudget);
 
 export default router;
